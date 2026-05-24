@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>London Tipps</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --london-red: #C8102E;
+    --london-blue: #012169;
+    --accent: #F5A623;
+    --bg: #F8F7F4;
+    --card-bg: #FFFFFF;
+    --text: #2C2C2C;
+    --muted: #757575;
+    --border: #E0DDD8;
+    --shadow: 0 2px 12px rgba(0,0,0,0.08);
+    --shadow-hover: 0 6px 24px rgba(0,0,0,0.14);
+    --radius: 14px;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    background: linear-gradient(135deg, var(--london-blue) 0%, #1a3a7a 100%);
+    color: white;
+    padding: 28px 24px 24px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 3px 16px rgba(0,0,0,0.25);
+  }
+  .header-top {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+  .london-eye {
+    font-size: 36px;
+    line-height: 1;
+  }
+  header h1 {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+  header p {
+    font-size: 13px;
+    opacity: 0.7;
+    margin-top: 2px;
+  }
+  .stats-badge {
+    margin-left: auto;
+    background: rgba(255,255,255,0.15);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  /* SEARCH */
+  .search-wrap {
+    position: relative;
+    margin-bottom: 14px;
+  }
+  .search-wrap input {
+    width: 100%;
+    padding: 12px 16px 12px 42px;
+    border-radius: 30px;
+    border: none;
+    background: rgba(255,255,255,0.15);
+    color: white;
+    font-size: 15px;
+    outline: none;
+    transition: background 0.2s;
+  }
+  .search-wrap input::placeholder { color: rgba(255,255,255,0.55); }
+  .search-wrap input:focus { background: rgba(255,255,255,0.22); }
+  .search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.6;
+    font-size: 16px;
+  }
+
+  /* FILTER TABS */
+  .filters {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+  }
+  .filters::-webkit-scrollbar { display: none; }
+  .filter-btn {
+    border: 2px solid rgba(255,255,255,0.3);
+    background: transparent;
+    color: rgba(255,255,255,0.8);
+    padding: 7px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.18s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .filter-btn:hover { background: rgba(255,255,255,0.12); }
+  .filter-btn.active {
+    background: white;
+    color: var(--london-blue);
+    border-color: white;
+  }
+  .filter-count {
+    background: rgba(255,255,255,0.25);
+    border-radius: 10px;
+    padding: 1px 6px;
+    font-size: 11px;
+  }
+  .filter-btn.active .filter-count {
+    background: rgba(1,33,105,0.12);
+  }
+
+  /* MAIN CONTENT */
+  main {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 20px 16px 40px;
+  }
+
+  /* VIEW TOGGLES */
+  .toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  .results-count { font-size: 14px; color: var(--muted); font-weight: 500; }
+  .view-toggle { display: flex; gap: 6px; }
+  .view-btn {
+    background: white;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 10px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.15s;
+    color: var(--muted);
+  }
+  .view-btn.active { background: var(--london-blue); color: white; border-color: var(--london-blue); }
+
+  /* CARDS GRID */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+  }
+  .cards-grid.list-view {
+    grid-template-columns: 1fr;
+  }
+
+  /* CARD */
+  .card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+  .card:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); }
+  .cards-grid.list-view .card {
+    flex-direction: row;
+    align-items: stretch;
+  }
+
+  .card-color-bar {
+    height: 5px;
+    width: 100%;
+    flex-shrink: 0;
+  }
+  .cards-grid.list-view .card-color-bar {
+    height: auto;
+    width: 5px;
+  }
+
+  .card-body { padding: 16px; flex: 1; }
+  .card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+  .card-name { font-size: 16px; font-weight: 700; line-height: 1.3; }
+  .card-desc { font-size: 13.5px; color: var(--muted); line-height: 1.55; margin-bottom: 12px; }
+
+  .card-footer { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+  /* CATEGORY BADGE */
+  .cat-badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 12px;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+  }
+
+  /* PRICE TAG */
+  .price-tag {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--london-red);
+    background: #FFF0F2;
+    border-radius: 10px;
+    padding: 3px 9px;
+  }
+
+  /* ACTIONS */
+  .card-actions { display: flex; gap: 6px; margin-left: auto; }
+  .action-btn {
+    background: none;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 5px 9px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.15s;
+    color: var(--muted);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 13px;
+  }
+  .action-btn:hover { border-color: var(--london-blue); color: var(--london-blue); background: #EEF2FB; }
+  .action-btn.fav-active { background: #FFF7E6; border-color: var(--accent); color: var(--accent); }
+  .action-btn.visited-active { background: #EDFAF3; border-color: #27AE60; color: #27AE60; }
+
+  /* STATUS BADGES on card */
+  .status-badges { position: absolute; top: 12px; right: 12px; display: flex; flex-direction: column; gap: 4px; align-items: flex-end; }
+  .status-pill {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 10px;
+    letter-spacing: 0.3px;
+  }
+  .pill-fav { background: var(--accent); color: white; }
+  .pill-visited { background: #27AE60; color: white; }
+
+  /* HIDDEN GEM NUMBER */
+  .gem-number {
+    width: 28px;
+    height: 28px;
+    background: var(--london-blue);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 800;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* EMPTY STATE */
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--muted);
+  }
+  .empty-state .empty-icon { font-size: 48px; margin-bottom: 12px; }
+  .empty-state h3 { font-size: 18px; color: var(--text); margin-bottom: 6px; }
+
+  /* Category colors */
+  .cat-restaurant { background: #FFF0F2; color: #C8102E; }
+  .bar-restaurant { background: #C8102E; }
+  .cat-bar { background: #FEF3E2; color: #E67E22; }
+  .bar-bar { background: #E67E22; }
+  .cat-event { background: #EEF2FB; color: #012169; }
+  .bar-event { background: #012169; }
+  .cat-gem { background: #F0FDF4; color: #16A34A; }
+  .bar-gem { background: #16A34A; }
+  .cat-shopping { background: #FDF4FF; color: #9333EA; }
+  .bar-shopping { background: #9333EA; }
+  .cat-sightseeing { background: #FFF7ED; color: #C2410C; }
+  .bar-sightseeing { background: #C2410C; }
+
+  /* SECTION HEADERS */
+  .section-header {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 24px 0 10px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid var(--border);
+  }
+
+  @media (max-width: 600px) {
+    header { padding: 20px 16px 18px; }
+    header h1 { font-size: 22px; }
+    .cards-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <span class="london-eye">🇬🇧</span>
+    <div>
+      <h1>London Tipps</h1>
+      <p>Meine persönliche Sammlung</p>
+    </div>
+    <div class="stats-badge" id="statsLabel">30 Tipps</div>
+  </div>
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="searchInput" placeholder="Suchen..." oninput="render()">
+  </div>
+  <div class="filters" id="filterBar"></div>
+</header>
+
+<main>
+  <div class="toolbar">
+    <div class="results-count" id="resultsCount"></div>
+    <div class="view-toggle">
+      <button class="view-btn active" id="gridViewBtn" onclick="setView('grid')" title="Rasteransicht">⊞</button>
+      <button class="view-btn" id="listViewBtn" onclick="setView('list')" title="Listenansicht">☰</button>
+    </div>
+  </div>
+  <div class="cards-grid" id="cardsGrid"></div>
+</main>
+
+<script>
+const TIPS = [
+  // RESTAURANTS
+  { id:1, name:"The Athenaeum", category:"restaurant", subcat:"Afternoon Tea", desc:"Piccadilly – Klassischer Afternoon Tea im eleganten Hotel. Einer der schönsten in London.", price:"£60pp", maps:"The Athenaeum Hotel London Piccadilly", emoji:"🫖" },
+  { id:2, name:"The Orangery", category:"restaurant", subcat:"Afternoon Tea", desc:"Kensington Palace – Afternoon Tea im historischen Palastgarten. Märchenhafte Kulisse!", price:"£59pp", maps:"The Orangery Kensington Palace London", emoji:"🌸" },
+  { id:3, name:"Dalloway Terrace", category:"restaurant", subcat:"Afternoon Tea", desc:"Bloomsbury – Romantischer Tea im Garten mit toller floraler Deko. Sehr beliebt, Reservierung empfohlen.", price:"£55pp", maps:"Dalloway Terrace Bloomsbury London", emoji:"🌺" },
+  { id:4, name:"Coffee Matters", category:"restaurant", subcat:"Brunch", desc:"157 Bethnal Green Rd, E2 7DG – Londons bestes Hidden Brunch Spot. Toller Kaffee & Matcha, gratis WiFi, perfekt zum Arbeiten.", price:"", maps:"Coffee Matters 157 Bethnal Green Rd London", emoji:"☕" },
+
+  // BARS & ROOFTOPS
+  { id:5, name:"The Garden at 120", category:"bar", subcat:"Rooftop", desc:"City of London – Einer der schönsten kostenlosen Rooftops! Überragender Blick auf den Gherkin. Eintritt kostenlos!", price:"Kostenlos", maps:"The Garden at 120 Fenchurch Street London", emoji:"🏙️" },
+  { id:6, name:"The Southwark Tavern", category:"bar", subcat:"Pub", desc:"Bankside – Pub in einem alten Schuldnergefängnis. Getränke in den originalen gemütlichen Zellen genießen – einzigartiges Erlebnis!", price:"", maps:"The Southwark Tavern London", emoji:"🍺" },
+
+  // EVENTS
+  { id:7, name:"Silent Disco", category:"event", subcat:"Erlebnis", desc:"Natural History Museum – Tanzen mit den Dinosauriern! 3 DJs auf Wireless-Kanälen, Kanal frei wählbar. Absolute Bucket-List!", price:"", maps:"Natural History Museum London", emoji:"🎧" },
+  { id:8, name:"Regents Park Open Air Theatre", category:"event", subcat:"Theater", desc:"Magisches Freilichttheater im Regents Park – fühlt sich an wie ein Zaubermärchen. Programm: Sherlock Holmes, A Midsummer Night's Dream, CATS.", price:"", maps:"Regents Park Open Air Theatre London", emoji:"🎭" },
+
+  // HIDDEN GEMS
+  { id:9,  name:"JOIA Rooftop Pool", category:"gem", subcat:"Hidden Gem", desc:"Versteckter Rooftop-Pool mit Stadtblick – wenig bekannt, absolutes Geheimtipp.", num:1, maps:"JOIA Rooftop London", emoji:"🏊" },
+  { id:10, name:"Upside Down Globe", category:"gem", subcat:"Hidden Gem", desc:"Kurioses Kunstwerk in der City – ein auf dem Kopf stehendes Modell des Globus Theater.", num:2, maps:"Upside Down Globe London", emoji:"🌍" },
+  { id:11, name:"London Museum Docklands", category:"gem", subcat:"Hidden Gem", desc:"Faszinierende Geschichte des Londoner Hafens und Handels. Weniger bekannt als das Hauptmuseum.", num:3, maps:"Museum of London Docklands", emoji:"⚓" },
+  { id:12, name:"The Rooftop at The Postal Building", category:"gem", subcat:"Hidden Gem", desc:"Einzigartiger Rooftop im historischen Postgebäude in Mount Pleasant.", num:4, maps:"The Postal Building London Rooftop", emoji:"📮" },
+  { id:13, name:"Barts", category:"gem", subcat:"Hidden Gem", desc:"Versteckter Cocktailbar – Eingang hinter einem Gemälde. Typisch London!", num:5, maps:"Barts Bar Chelsea London", emoji:"🍸" },
+  { id:14, name:"Eel Pie Island", category:"gem", subcat:"Hidden Gem", desc:"Kleine Insel in der Themse bei Twickenham – Künstlerkolonie, nur zu Fuß erreichbar.", num:6, maps:"Eel Pie Island Twickenham", emoji:"🏝️" },
+  { id:15, name:"Broccoly Gallery", category:"gem", subcat:"Hidden Gem", desc:"Versteckte Kunstgalerie in East London.", num:7, maps:"Broccoly Gallery London", emoji:"🎨" },
+  { id:16, name:"Golders Hill Park Zoo", category:"gem", subcat:"Hidden Gem", desc:"Kleiner kostenloser Zoo im Golders Hill Park – perfekt für Familien, kaum bekannt.", num:8, maps:"Golders Hill Park Zoo London", emoji:"🦜" },
+  { id:17, name:"Hampton Court – Henry VIII's Kitchen", category:"gem", subcat:"Hidden Gem", desc:"Die monumentale Küche von Heinrich VIII. im Hampton Court Palace – beeindruckende Geschichte.", num:9, maps:"Hampton Court Palace Kitchen", emoji:"👑" },
+  { id:18, name:"Buddhapadipa Temple", category:"gem", subcat:"Hidden Gem", desc:"Wunderschöner Thai-Tempel in Wimbledon mit Gartenanlagen.", num:10, maps:"Buddhapadipa Temple Wimbledon", emoji:"🏯" },
+  { id:19, name:"Tegermilk, Spitalfields", category:"gem", subcat:"Hidden Gem", desc:"Verstecktes Café/Geschäft in Spitalfields.", num:11, maps:"Tegermilk Spitalfields London", emoji:"🥛" },
+  { id:20, name:"The City Barge Tunnel", category:"gem", subcat:"Hidden Gem", desc:"Historischer Tunnel unter der Themse.", num:12, maps:"City Barge Tunnel London", emoji:"🚇" },
+  { id:21, name:"Foster Books", category:"gem", subcat:"Hidden Gem", desc:"Winzige antiquarische Buchhandlung in Chiswick – ein verstecktes Juwel.", num:13, maps:"Foster Books Chiswick London", emoji:"📚" },
+  { id:22, name:"Waterside Cafe", category:"gem", subcat:"Hidden Gem", desc:"Gemütliches Café direkt am Wasser – perfekter Rückzugsort.", num:14, maps:"Waterside Cafe London", emoji:"🌊" },
+  { id:23, name:"Romeo & Juliet Mural", category:"gem", subcat:"Hidden Gem", desc:"Großes Street-Art Wandgemälde in London – Instagram-würdig!", num:15, maps:"Romeo Juliet Mural London", emoji:"🎨" },
+  { id:24, name:"Wizards & Spells", category:"gem", subcat:"Hidden Gem", desc:"Magischer Shop für Harry-Potter-Fans und Liebhaber des Okkulten.", num:16, maps:"Wizards and Spells London", emoji:"🧙" },
+  { id:25, name:"Stave Hill Ecology Park", category:"gem", subcat:"Hidden Gem", desc:"Unerwarteter Aussichtspunkt in Rotherhithe mit Panoramablick über London – kaum bekannt!", num:17, maps:"Stave Hill Ecology Park London", emoji:"🌿" },
+
+  // SHOPPING
+  { id:26, name:"Golborne Road", category:"shopping", subcat:"Straße", desc:"Nahe Notting Hill – Berühmte Straße mit Restaurants, Vintage-Shops, Cafés und tollen Bäckereien. Entspannter als Portobello Road.", price:"", maps:"Golborne Road London", emoji:"🛍️" },
+  { id:27, name:"Liberty London", category:"shopping", subcat:"Kaufhaus", desc:"Ikonisches Tudor-Kaufhaus in Soho – bekannt für exklusive Stoffe, Mode und einzigartige Geschenke. Ein Muss!", price:"", maps:"Liberty London Soho", emoji:"🏰" },
+
+  // SIGHTSEEING
+  { id:28, name:"Saint Bartholomew Church", category:"sightseeing", subcat:"Kirche", desc:"Smithfield – Eine der besten historischen Sehenswürdigkeiten Londons, oft übersehen von Touristen. Normannische Architektur.", price:"", maps:"St Bartholomew the Great Church London Smithfield", emoji:"⛪" },
+  { id:29, name:"Neal's Yard", category:"sightseeing", subcat:"Gasse", desc:"Covent Garden – Farbenfrohe versteckte Gasse mit Cafés, Shops & Neal's Yard Remedies. Sehr fotogen!", price:"", maps:"Neal's Yard Covent Garden London", emoji:"🌈" },
+  { id:30, name:"Millennium Bridge", category:"sightseeing", subcat:"Brücke", desc:"Fußgängerbrücke mit Blick auf St Paul's Cathedral – besonders schön bei Sonnenuntergang.", price:"Kostenlos", maps:"Millennium Bridge London", emoji:"🌉" },
+  { id:31, name:"Tower Bridge", category:"sightseeing", subcat:"Brücke", desc:"Ikonische Klappbrücke – schönste Aussicht vom Südufer der Themse. Abends beleuchtet spektakulär.", price:"", maps:"Tower Bridge London", emoji:"🗼" },
+  { id:32, name:"Covent Garden", category:"sightseeing", subcat:"Viertel", desc:"Historischer Marktplatz mit Straßenkünstlern, Restaurants und Boutique-Shops. Immer belebt.", price:"", maps:"Covent Garden London", emoji:"🎪" },
+  { id:33, name:"Spitalfields Market", category:"sightseeing", subcat:"Markt", desc:"East London – Bester Sonntags-Markt: Vintage, Street Food & lokale Designer. Auch unter der Woche geöffnet.", price:"", maps:"Spitalfields Market London", emoji:"🛒" },
+];
+
+const CATEGORIES = [
+  { key:"all",         label:"Alle",          emoji:"🗺️" },
+  { key:"restaurant",  label:"Essen & Trinken",emoji:"🍽️" },
+  { key:"bar",         label:"Bars & Rooftops",emoji:"🍸" },
+  { key:"event",       label:"Erlebnisse",    emoji:"🎭" },
+  { key:"gem",         label:"Hidden Gems",   emoji:"💎" },
+  { key:"shopping",    label:"Shopping",      emoji:"🛍️" },
+  { key:"sightseeing", label:"Sightseeing",   emoji:"📸" },
+];
+
+// State
+let activeFilter = "all";
+let viewMode = "grid";
+let favs = JSON.parse(localStorage.getItem("londonFavs") || "[]");
+let visited = JSON.parse(localStorage.getItem("londonVisited") || "[]");
+
+function save() {
+  localStorage.setItem("londonFavs", JSON.stringify(favs));
+  localStorage.setItem("londonVisited", JSON.stringify(visited));
+}
+
+function toggleFav(id) {
+  favs = favs.includes(id) ? favs.filter(x=>x!==id) : [...favs, id];
+  save(); render();
+}
+function toggleVisited(id) {
+  visited = visited.includes(id) ? visited.filter(x=>x!==id) : [...visited, id];
+  save(); render();
+}
+
+function setFilter(key) { activeFilter = key; render(); }
+function setView(v) {
+  viewMode = v;
+  document.getElementById("gridViewBtn").classList.toggle("active", v==="grid");
+  document.getElementById("listViewBtn").classList.toggle("active", v==="list");
+  document.getElementById("cardsGrid").classList.toggle("list-view", v==="list");
+  render();
+}
+
+function getFiltered() {
+  const q = document.getElementById("searchInput").value.trim().toLowerCase();
+  return TIPS.filter(t => {
+    const matchCat = activeFilter === "all" || t.category === activeFilter;
+    const matchQ = !q || t.name.toLowerCase().includes(q) || t.desc.toLowerCase().includes(q) || (t.subcat||"").toLowerCase().includes(q);
+    return matchCat && matchQ;
+  });
+}
+
+function renderFilters() {
+  const bar = document.getElementById("filterBar");
+  bar.innerHTML = CATEGORIES.map(c => {
+    const count = c.key === "all" ? TIPS.length : TIPS.filter(t=>t.category===c.key).length;
+    return `<button class="filter-btn ${activeFilter===c.key?'active':''}" onclick="setFilter('${c.key}')">
+      ${c.emoji} ${c.label} <span class="filter-count">${count}</span>
+    </button>`;
+  }).join("");
+}
+
+function mapsUrl(query) {
+  return "https://www.google.com/maps/search/" + encodeURIComponent(query);
+}
+
+function cardColor(cat) {
+  return { restaurant:"bar-restaurant", bar:"bar-bar", event:"bar-event", gem:"bar-gem", shopping:"bar-shopping", sightseeing:"bar-sightseeing" }[cat] || "bar-event";
+}
+function badgeColor(cat) {
+  return { restaurant:"cat-restaurant", bar:"cat-bar", event:"cat-event", gem:"cat-gem", shopping:"cat-shopping", sightseeing:"cat-sightseeing" }[cat] || "cat-event";
+}
+
+function renderCard(t) {
+  const isFav = favs.includes(t.id);
+  const isVisited = visited.includes(t.id);
+  const isListView = viewMode === "list";
+
+  return `<div class="card" id="card-${t.id}">
+    <div class="card-color-bar ${cardColor(t.category)}"></div>
+    <div class="card-body">
+      <div class="status-badges">
+        ${isFav ? '<span class="status-pill pill-fav">⭐ Merkliste</span>' : ''}
+        ${isVisited ? '<span class="status-pill pill-visited">✓ Besucht</span>' : ''}
+      </div>
+      <div class="card-header">
+        ${t.num ? `<div class="gem-number">${t.num}</div>` : ''}
+        <div style="flex:1">
+          <div class="card-name">${t.emoji} ${t.name}</div>
+        </div>
+      </div>
+      <div class="card-desc">${t.desc}</div>
+      <div class="card-footer">
+        <span class="cat-badge ${badgeColor(t.category)}">${t.subcat}</span>
+        ${t.price ? `<span class="price-tag">${t.price}</span>` : ''}
+        <div class="card-actions">
+          <button class="action-btn ${isFav?'fav-active':''}" onclick="toggleFav(${t.id})" title="Merkliste">
+            ${isFav ? '⭐' : '☆'}
+          </button>
+          <button class="action-btn ${isVisited?'visited-active':''}" onclick="toggleVisited(${t.id})" title="Als besucht markieren">
+            ${isVisited ? '✓' : '○'}
+          </button>
+          ${t.maps ? `<a class="action-btn" href="${mapsUrl(t.maps)}" target="_blank" title="Google Maps">📍</a>` : ''}
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function render() {
+  renderFilters();
+  const filtered = getFiltered();
+  const grid = document.getElementById("cardsGrid");
+  const count = document.getElementById("resultsCount");
+  const statsLabel = document.getElementById("statsLabel");
+
+  statsLabel.textContent = `${favs.length} ⭐  ${visited.length} ✓`;
+  count.textContent = `${filtered.length} Tipp${filtered.length!==1?'s':''}`;
+
+  if (filtered.length === 0) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
+      <div class="empty-icon">🔍</div>
+      <h3>Keine Treffer</h3>
+      <p>Versuche eine andere Suche oder Kategorie</p>
+    </div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map(renderCard).join("");
+}
+
+// Init
+renderFilters();
+render();
+</script>
+</body>
+</html>
