@@ -316,6 +316,170 @@
     header h1 { font-size: 22px; }
     .cards-grid { grid-template-columns: 1fr; }
   }
+
+  /* UPLOAD BUTTON */
+  .upload-btn {
+    background: rgba(255,255,255,0.18);
+    border: 1.5px solid rgba(255,255,255,0.4);
+    border-radius: 22px;
+    color: white;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.18s;
+    white-space: nowrap;
+  }
+  .upload-btn:hover { background: rgba(255,255,255,0.28); }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: white;
+    border-radius: 18px;
+    width: 100%;
+    max-width: 520px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
+  .modal-header {
+    background: linear-gradient(135deg, var(--london-blue) 0%, #1a3a7a 100%);
+    color: white;
+    padding: 20px 24px;
+    border-radius: 18px 18px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .modal-header h2 { font-size: 18px; font-weight: 700; }
+  .modal-close {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: white;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-body { padding: 24px; }
+
+  /* DROPZONE */
+  .dropzone {
+    border: 2px dashed var(--border);
+    border-radius: 12px;
+    padding: 32px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: #FAFAFA;
+    margin-bottom: 20px;
+  }
+  .dropzone:hover, .dropzone.drag-over {
+    border-color: var(--london-blue);
+    background: #EEF2FB;
+  }
+  .dropzone-icon { font-size: 36px; margin-bottom: 8px; }
+  .dropzone p { color: var(--muted); font-size: 14px; }
+  .dropzone b { color: var(--london-blue); }
+  .dropzone input[type=file] { display: none; }
+
+  /* PREVIEW IMAGE */
+  .preview-img {
+    width: 100%;
+    max-height: 220px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-bottom: 16px;
+    display: none;
+  }
+
+  /* FORM FIELDS */
+  .form-group { margin-bottom: 14px; }
+  .form-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 5px;
+  }
+  .form-group input, .form-group select, .form-group textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--text);
+    background: white;
+    transition: border-color 0.15s;
+    outline: none;
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    border-color: var(--london-blue);
+  }
+  .form-group textarea { resize: vertical; min-height: 80px; }
+
+  /* STATUS LINE */
+  .ocr-status {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 14px;
+    min-height: 18px;
+  }
+  .ocr-status.loading { color: #E67E22; }
+  .ocr-status.done { color: #16A34A; }
+
+  /* MODAL FOOTER */
+  .modal-footer {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    padding: 16px 24px 24px;
+    border-top: 1px solid var(--border);
+  }
+  .btn-cancel {
+    background: white;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--muted);
+    transition: all 0.15s;
+  }
+  .btn-cancel:hover { border-color: var(--london-blue); color: var(--london-blue); }
+  .btn-save {
+    background: var(--london-blue);
+    border: none;
+    border-radius: 10px;
+    padding: 10px 24px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    color: white;
+    transition: background 0.15s;
+  }
+  .btn-save:hover { background: #1a3a7a; }
+  .btn-save:disabled { background: var(--border); cursor: not-allowed; }
 </style>
 </head>
 <body>
@@ -327,7 +491,8 @@
       <h1>London Tipps</h1>
       <p>Meine persönliche Sammlung</p>
     </div>
-    <div class="stats-badge" id="statsLabel">30 Tipps</div>
+    <div class="stats-badge" id="statsLabel">40 Tipps</div>
+    <button class="upload-btn" onclick="openUploadModal()">📸 + Tipp</button>
   </div>
   <div class="search-wrap">
     <span class="search-icon">🔍</span>
@@ -347,7 +512,70 @@
   <div class="cards-grid" id="cardsGrid"></div>
 </main>
 
+<!-- UPLOAD MODAL -->
+<div class="modal-overlay" id="uploadModal" onclick="handleOverlayClick(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>📸 Screenshot hinzufügen</h2>
+      <button class="modal-close" onclick="closeUploadModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()"
+           ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+        <input type="file" id="fileInput" accept="image/*" onchange="handleFile(event)">
+        <div class="dropzone-icon">🖼️</div>
+        <p><b>Klicke hier</b> oder ziehe ein Screenshot-Bild rein</p>
+        <p style="margin-top:4px;font-size:12px">JPG, PNG, HEIC – aus Google Fotos oder direkt vom iPhone</p>
+      </div>
+      <img class="preview-img" id="previewImg" alt="Vorschau">
+      <div class="ocr-status" id="ocrStatus"></div>
+      <div id="uploadForm" style="display:none">
+        <div class="form-group">
+          <label>Name des Ortes</label>
+          <input type="text" id="fName" placeholder="z.B. Bōkan 39 Rooftop">
+        </div>
+        <div class="form-group">
+          <label>Kategorie</label>
+          <select id="fCat">
+            <option value="restaurant">🍽️ Essen & Trinken</option>
+            <option value="bar">🍸 Bars & Rooftops</option>
+            <option value="event">🎭 Erlebnisse</option>
+            <option value="gem">💎 Hidden Gems</option>
+            <option value="shopping">🛍️ Shopping</option>
+            <option value="sightseeing">📸 Sightseeing</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Unterkategorie <span style="color:var(--muted);font-weight:400">(optional)</span></label>
+          <input type="text" id="fSubcat" placeholder="z.B. Rooftop, Brunch, Park…">
+        </div>
+        <div class="form-group">
+          <label>Beschreibung</label>
+          <textarea id="fDesc" placeholder="Was macht diesen Ort besonders?"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Preis <span style="color:var(--muted);font-weight:400">(optional)</span></label>
+          <input type="text" id="fPrice" placeholder="z.B. £30pp, Kostenlos…">
+        </div>
+        <div class="form-group">
+          <label>Google Maps Suchbegriff</label>
+          <input type="text" id="fMaps" placeholder="z.B. Bokan 39 Canary Wharf London">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer" id="modalFooter" style="display:none">
+      <button class="btn-cancel" onclick="closeUploadModal()">Abbrechen</button>
+      <button class="btn-save" onclick="saveNewTip()">✓ Tipp speichern</button>
+    </div>
+  </div>
+</div>
+
+
 <script>
+// Custom tips added via screenshot upload (persisted in localStorage)
+let customTips = JSON.parse(localStorage.getItem("londonCustomTips") || "[]");
+function getAllTips() { return [...TIPS, ...customTips]; }
+
 const TIPS = [
   // RESTAURANTS
   { id:1, name:"The Athenaeum", category:"restaurant", subcat:"Afternoon Tea", desc:"Piccadilly – Klassischer Afternoon Tea im eleganten Hotel. Einer der schönsten in London.", price:"£60pp", maps:"The Athenaeum Hotel London Piccadilly", emoji:"🫖" },
@@ -393,6 +621,15 @@ const TIPS = [
   { id:31, name:"Tower Bridge", category:"sightseeing", subcat:"Brücke", desc:"Ikonische Klappbrücke – schönste Aussicht vom Südufer der Themse. Abends beleuchtet spektakulär.", price:"", maps:"Tower Bridge London", emoji:"🗼" },
   { id:32, name:"Covent Garden", category:"sightseeing", subcat:"Viertel", desc:"Historischer Marktplatz mit Straßenkünstlern, Restaurants und Boutique-Shops. Immer belebt.", price:"", maps:"Covent Garden London", emoji:"🎪" },
   { id:33, name:"Spitalfields Market", category:"sightseeing", subcat:"Markt", desc:"East London – Bester Sonntags-Markt: Vintage, Street Food & lokale Designer. Auch unter der Woche geöffnet.", price:"", maps:"Spitalfields Market London", emoji:"🛒" },
+
+  // NEU – von Eva's Screenshots
+  { id:34, name:"Bōkan 39 Rooftop", category:"bar", subcat:"Rooftop", desc:"Canary Wharf – Spektakulärer Rooftop im 39. Stock mit Panoramablick über London. Cocktails & Dinner mit einzigartigem Abendrot-Blick.", price:"", maps:"Bokan 39 Canary Wharf London", emoji:"🌅" },
+  { id:35, name:"Petersham Nurseries", category:"restaurant", subcat:"Café & Restaurant", desc:"Richmond – Traumhaftes Restaurant & Café in einem blühenden Gewächshaus. Umgeben von Blumen und Pflanzen, absolut magisch.", price:"", maps:"Petersham Nurseries Richmond London", emoji:"🌸" },
+  { id:36, name:"Eden Dock", category:"sightseeing", subcat:"Docks", desc:"Canary Wharf – Wunderschöne Promenade an den Docks mit DLR-Kulisse. Entspannter Spazierort abseits des Trubels.", price:"Kostenlos", maps:"Eden Dock Canary Wharf London", emoji:"🌿" },
+  { id:37, name:"Potters Fields Park", category:"sightseeing", subcat:"Park", desc:"Southwark – Grüner Park direkt an der Themse mit spektakulärem Blick auf die City-Skyline. Perfekt für Picknick bei Sonnenuntergang.", price:"Kostenlos", maps:"Potters Fields Park London", emoji:"🌇" },
+  { id:38, name:"St Katherine's Docks", category:"sightseeing", subcat:"Docks", desc:"Tower Hill – Historische Marina mit wunderschönen alten Lagerhäusern, Yachten und Restaurants. Direkt neben Tower Bridge.", price:"Kostenlos", maps:"St Katharine Docks London", emoji:"⛵" },
+  { id:39, name:"The Summerhouse", category:"restaurant", subcat:"Restaurant", desc:"Little Venice – Romantisches Restaurant direkt am Kanal mit traumhaftem Blick auf die Hausboote. Perfekt für einen besonderen Abend.", price:"", maps:"The Summerhouse Little Venice London", emoji:"🌿" },
+  { id:40, name:"Oxo Tower Bar", category:"bar", subcat:"Bar", desc:"South Bank – Bar mit Terrasse und atemberaubendem Blick auf St Paul's Cathedral und die City. Besonders schön bei Sonnenuntergang.", price:"", maps:"Oxo Tower Bar London South Bank", emoji:"🏛️" },
 ];
 
 const CATEGORIES = [
@@ -436,7 +673,7 @@ function setView(v) {
 
 function getFiltered() {
   const q = document.getElementById("searchInput").value.trim().toLowerCase();
-  return TIPS.filter(t => {
+  return getAllTips().filter(t => {
     const matchCat = activeFilter === "all" || t.category === activeFilter;
     const matchQ = !q || t.name.toLowerCase().includes(q) || t.desc.toLowerCase().includes(q) || (t.subcat||"").toLowerCase().includes(q);
     return matchCat && matchQ;
@@ -446,7 +683,8 @@ function getFiltered() {
 function renderFilters() {
   const bar = document.getElementById("filterBar");
   bar.innerHTML = CATEGORIES.map(c => {
-    const count = c.key === "all" ? TIPS.length : TIPS.filter(t=>t.category===c.key).length;
+    const all = getAllTips();
+    const count = c.key === "all" ? all.length : all.filter(t=>t.category===c.key).length;
     return `<button class="filter-btn ${activeFilter===c.key?'active':''}" onclick="setFilter('${c.key}')">
       ${c.emoji} ${c.label} <span class="filter-count">${count}</span>
     </button>`;
@@ -525,6 +763,155 @@ function render() {
 // Init
 renderFilters();
 render();
+
+// ─── UPLOAD MODAL ───────────────────────────────────────────────────────────
+
+function openUploadModal() {
+  document.getElementById("uploadModal").classList.add("open");
+  resetUploadModal();
+}
+function closeUploadModal() {
+  document.getElementById("uploadModal").classList.remove("open");
+}
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById("uploadModal")) closeUploadModal();
+}
+
+function resetUploadModal() {
+  document.getElementById("previewImg").style.display = "none";
+  document.getElementById("uploadForm").style.display = "none";
+  document.getElementById("modalFooter").style.display = "none";
+  document.getElementById("ocrStatus").textContent = "";
+  document.getElementById("ocrStatus").className = "ocr-status";
+  document.getElementById("dropzone").style.display = "block";
+  document.getElementById("fileInput").value = "";
+  ["fName","fSubcat","fDesc","fPrice","fMaps"].forEach(id => document.getElementById(id).value = "");
+  document.getElementById("fCat").value = "restaurant";
+}
+
+function handleDragOver(e) {
+  e.preventDefault();
+  document.getElementById("dropzone").classList.add("drag-over");
+}
+function handleDragLeave() {
+  document.getElementById("dropzone").classList.remove("drag-over");
+}
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById("dropzone").classList.remove("drag-over");
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith("image/")) processFile(file);
+}
+function handleFile(e) {
+  const file = e.target.files[0];
+  if (file) processFile(file);
+}
+
+function processFile(file) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const src = e.target.result;
+    // Show preview
+    const img = document.getElementById("previewImg");
+    img.src = src;
+    img.style.display = "block";
+    // Hide dropzone, show form
+    document.getElementById("dropzone").style.display = "none";
+    document.getElementById("uploadForm").style.display = "block";
+    document.getElementById("modalFooter").style.display = "flex";
+    // Start OCR
+    runOCR(src);
+  };
+  reader.readAsDataURL(file);
+}
+
+function runOCR(imageSrc) {
+  const status = document.getElementById("ocrStatus");
+  status.textContent = "⏳ Lese Text aus dem Screenshot…";
+  status.className = "ocr-status loading";
+
+  // Lazy-load Tesseract
+  if (!window.Tesseract) {
+    const s = document.createElement("script");
+    s.src = "https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js";
+    s.onload = () => startTesseract(imageSrc);
+    document.head.appendChild(s);
+  } else {
+    startTesseract(imageSrc);
+  }
+}
+
+function startTesseract(imageSrc) {
+  Tesseract.recognize(imageSrc, "eng", { logger: () => {} })
+    .then(({ data: { text } }) => {
+      applyOCRResult(text);
+    })
+    .catch(() => {
+      const status = document.getElementById("ocrStatus");
+      status.textContent = "⚠️ Texterkennung fehlgeschlagen – bitte manuell ausfüllen.";
+      status.className = "ocr-status";
+    });
+}
+
+function applyOCRResult(text) {
+  const status = document.getElementById("ocrStatus");
+  // Extract the most prominent line (usually the place name – shortest non-noise line)
+  const lines = text.split("\n")
+    .map(l => l.trim())
+    .filter(l => l.length > 2 && l.length < 60)
+    .filter(l => !/kommentar|comment|freunde|reels|following|follower|likes|here are/i.test(l));
+
+  const nameLine = lines[0] || "";
+  if (nameLine) {
+    document.getElementById("fName").value = nameLine;
+    document.getElementById("fMaps").value = nameLine + " London";
+  }
+
+  // Auto-suggest category from OCR text
+  const lower = text.toLowerCase();
+  let cat = "sightseeing";
+  if (/rooftop|bar|cocktail|pub|drinks|bier|beer/i.test(lower)) cat = "bar";
+  else if (/restaurant|café|cafe|brunch|tea|food|essen|kitchen|nurseries|summerhouse/i.test(lower)) cat = "restaurant";
+  else if (/disco|theatre|theater|museum|concert|event/i.test(lower)) cat = "event";
+  else if (/market|shopping|shop|store|boutique|kaufhaus/i.test(lower)) cat = "shopping";
+  else if (/park|bridge|church|docks|dock|garden|square|palace|island/i.test(lower)) cat = "sightseeing";
+  else if (/hidden|secret|gem|unknown/i.test(lower)) cat = "gem";
+  document.getElementById("fCat").value = cat;
+
+  status.textContent = nameLine
+    ? `✅ Text erkannt: „${nameLine}" – bitte prüfen und ergänzen`
+    : "✅ Fertig – bitte Name und Details manuell eingeben";
+  status.className = "ocr-status done";
+}
+
+function saveNewTip() {
+  const name = document.getElementById("fName").value.trim();
+  if (!name) { alert("Bitte einen Namen eingeben."); return; }
+
+  const newId = 10000 + customTips.length + 1;
+  const tip = {
+    id: newId,
+    name,
+    category: document.getElementById("fCat").value,
+    subcat: document.getElementById("fSubcat").value.trim() || "Eigener Tipp",
+    desc: document.getElementById("fDesc").value.trim() || "",
+    price: document.getElementById("fPrice").value.trim(),
+    maps: document.getElementById("fMaps").value.trim(),
+    emoji: "📍",
+    custom: true
+  };
+
+  customTips.push(tip);
+  localStorage.setItem("londonCustomTips", JSON.stringify(customTips));
+  closeUploadModal();
+  render();
+
+  // Flash the new card
+  setTimeout(() => {
+    const el = document.getElementById("card-" + newId);
+    if (el) { el.style.outline = "3px solid var(--london-blue)"; setTimeout(() => el.style.outline = "", 2000); }
+  }, 100);
+}
 </script>
 </body>
 </html>
